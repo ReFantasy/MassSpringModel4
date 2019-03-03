@@ -61,12 +61,12 @@ int main()
 	style->SetUseTimers(30);
 	style->UseTimersOn();
 
-	while (1)
-	{
-		Sleep(50);
-		UpdateFrame();
-		renderWindow->Render();
-	}
+	//while (1)
+	//{
+	//	Sleep(50);
+	//	UpdateFrame();
+	//	renderWindow->Render();
+	//}
 
 
 	//style->SetTimerDuration(30);
