@@ -48,6 +48,8 @@ private:  // 数据
 	vector<Mass> *pCurrent = nullptr;
 	vector<Mass> *pNext = nullptr;
 
+	int layer_height = 0;  // 质点弹簧层的高度
+
 	// 弹簧map  索引为弹簧两端质点的ID
 	map<pair<vtkIdType, vtkIdType>, Spring> springs;    // 弹簧向量
 
@@ -75,7 +77,9 @@ private:  // 数据
 	vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 	vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
 private:  // 私有函数
-
+	void InitMass();
+	void InitSpring();
+	void InitVtkData();
 	// 根据网格坐标(i,j)获取ID
 	vtkIdType GetMassId(vtkIdType i, vtkIdType j)
 	{

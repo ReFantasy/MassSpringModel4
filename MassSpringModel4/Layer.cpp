@@ -14,176 +14,11 @@ float MassDefault = 0.01f;
 float dampFactor = 0.1f;
 
 Layer::Layer(int grid_sz, double y)
-	:grid_size(grid_sz)
+	:grid_size(grid_sz), layer_height(y)
 {
-	// 初始化质点
-	for (vtkIdType i = 0; i < grid_size; i++)
-	{
-		for (vtkIdType j = 0; j < grid_size; j++)
-		{
-			Mass mass;
-			mass.fixed = false;
-			mass.mass = 0.01;
-			mass.position.Set(i, y, j);
-			mass.velocity.Set(0, 0, 0);
-			masses1.push_back(mass);
-		}
-	}
-	masses2 = masses1;
-	pCurrent = &masses1;
-	pNext = &masses2;
-
-	// 初始化结构弹簧 y方向
-	for (vtkIdType i = 0; i < grid_size; i++)
-	{
-		for (vtkIdType j = 0; j < grid_size - 1; j++)
-		{
-			Spring spring;
-			spring.imass1 = GetMassId(i, j);
-			spring.imass2 = GetMassId(i, j + 1);
-			spring.naturalLength = NaturalLengthDefault;
-			spring.springConstant = SpringConstantDefault;
-			spring.tension = 0;
-			springs[{ GetMassId(i, j), GetMassId(i, j + 1) }] = spring;
-			//springs.insert({ GetMassId(i, j) ,GetMassId(i, j + 1) }, spring);
-		}
-	}
-	// 初始化结构弹簧 x方向
-	for (int i = 0; i < grid_size - 1; i++)
-	{
-		for (int j = 0; j < grid_size; j++)
-		{
-			Spring spring;
-			spring.imass1 = GetMassId(i, j);
-			spring.imass2 = GetMassId(i + 1, j);
-			spring.naturalLength = NaturalLengthDefault;
-			spring.springConstant = SpringConstantDefault;
-			spring.tension = 0;
-			springs[{ GetMassId(i, j), GetMassId(i + 1, j) }] = spring;
-			//springs.insert({ GetMassId(i, j) ,GetMassId(i + 1, j) }, spring);
-		}
-	}
-
-	//剪切弹簧初始化-右下
-	//The next (gridSize-1)*(gridSize-1) go from a ball to the one below and right
-	//excluding those on the bottom or right
-	for (int i = 0; i < grid_size - 1; ++i)
-	{
-		for (int j = 0; j < grid_size - 1; ++j)
-		{
-			Spring spring;
-			spring.imass1 = GetMassId(i, j);
-			spring.imass2 = GetMassId(i + 1, j+1);
-			spring.naturalLength = NaturalLengthDefault*sqrt(2.0);
-			spring.springConstant = SpringConstantDefault;
-			spring.tension = 0;
-			springs[{ GetMassId(i, j), GetMassId(i + 1, j+1) }] = spring;
-		}
-	}
-
-	//剪切弹簧初始化-左下
-	//The next (gridSize-1)*(gridSize-1) go from a ball to the one below and left
-	//excluding those on the bottom or right
-	for (int i = 0; i < grid_size - 1; ++i)
-	{
-		for (int j = 1; j < grid_size; ++j)
-		{
-			Spring spring;
-			spring.imass1 = GetMassId(i, j);
-			spring.imass2 = GetMassId(i + 1, j - 1);
-			spring.naturalLength = NaturalLengthDefault*sqrt(2.0);
-			spring.springConstant = SpringConstantDefault;
-			spring.tension = 0;
-			springs[{ GetMassId(i, j), GetMassId(i + 1, j - 1) }] = spring;
-		}
-	}
-
-	//弯曲弹簧初始化
-	//The first (gridSize-2)*gridSize springs go from one ball to the next but one,
-	//excluding those on or next to the right hand edge
-	for (int i = 0; i < grid_size; ++i)
-	{
-		for (int j = 0; j < grid_size - 2; ++j)
-		{
-			Spring spring;
-			spring.imass1 = GetMassId(i, j);
-			spring.imass2 = GetMassId(i , j + 2);
-			spring.naturalLength = NaturalLengthDefault*2;
-			spring.springConstant = SpringConstantDefault;
-			spring.tension = 0;
-			springs[{ GetMassId(i, j), GetMassId(i , j + 2) }] = spring;
-		}
-	}
-
-	//The next (gridSize-2)*gridSize springs go from one ball to the next but one below,
-	//excluding those on or next to the bottom edge
-	for (int i = 0; i < grid_size - 2; ++i)
-	{
-		for (int j = 0; j < grid_size; ++j)
-		{
-			Spring spring;
-			spring.imass1 = GetMassId(i, j);
-			spring.imass2 = GetMassId(i + 2, j);
-			spring.naturalLength = NaturalLengthDefault*2;
-			spring.springConstant = SpringConstantDefault;
-			spring.tension = 0;
-			springs[{ GetMassId(i, j), GetMassId(i + 2, j ) }] = spring;
-		}
-	}
-
-
-	//////////////////////////////////////////////////////////////////////////
-	for (int i = 0; i < grid_size; i++)
-	{
-		for (int j = 0; j < grid_size; j++)
-		{
-			points->InsertNextPoint(i, y, j);
-		}
-	}
-
-	for (int i = 0; i < grid_size - 1; i++)
-	{
-		for (int j = 0; j < grid_size; j++)
-		{
-			// 沿x方向
-			vtkSmartPointer<vtkLine> line_x = vtkSmartPointer<vtkLine>::New();
-			line_x->GetPointIds()->SetId(0, i*grid_size + j);
-			line_x->GetPointIds()->SetId(1, (i + 1)*grid_size + j);
-			springs_structure->InsertNextCell(line_x);
-		}
-	}
-	for (int i = 0; i < grid_size; i++)
-	{
-		for (int j = 0; j < grid_size - 1; j++)
-		{
-			// 沿y方向
-			vtkSmartPointer<vtkLine> line_y = vtkSmartPointer<vtkLine>::New();
-			line_y->GetPointIds()->SetId(0, i*grid_size + j);
-			line_y->GetPointIds()->SetId(1, i*grid_size + j + 1);
-			springs_structure->InsertNextCell(line_y);
-		}
-	}
-	// 加入四边形拓扑结构vtkQuadraticQuad 
-	vtkSmartPointer<vtkCellArray> quad = vtkSmartPointer<vtkCellArray>::New();
-	for (int i = 0; i < grid_size - 1; i++)
-	{
-		for (int j = 0; j < grid_size - 1; j++)
-		{
-			quad->InsertNextCell(4);
-			quad->InsertCellPoint(GetMassId(i,j));
-			quad->InsertCellPoint(GetMassId(i, j+1));
-			quad->InsertCellPoint(GetMassId(i+1, j+1));
-			quad->InsertCellPoint(GetMassId(i+1, j));
-		}
-	}
-
-	
-	polydata->SetPoints(points);
-	polydata->SetLines(springs_structure);
-	polydata->SetPolys(quad);
-
-	mapper->SetInputData(polydata);
-	actor->SetMapper(mapper);
+	InitMass();
+	InitSpring();
+	InitVtkData();
 }
 
 bool Layer::SetMassFixed(vtkIdType i, vtkIdType j, bool is_fixed)
@@ -334,6 +169,185 @@ vtkSmartPointer<vtkTexture> Layer::SetTexture(std::string fileName)
 	mapper->SetInputConnection(xform->GetOutputPort());
 	actor->SetTexture(atext);
 	return atext;
+}
+
+void Layer::InitMass()
+{
+	int y = layer_height;
+	// 初始化质点
+	for (vtkIdType i = 0; i < grid_size; i++)
+	{
+		for (vtkIdType j = 0; j < grid_size; j++)
+		{
+			Mass mass;
+			mass.fixed = false;
+			mass.mass = 0.01;
+			mass.position.Set(i, y, j);
+			mass.velocity.Set(0, 0, 0);
+			masses1.push_back(mass);
+		}
+	}
+	masses2 = masses1;
+	pCurrent = &masses1;
+	pNext = &masses2;
+}
+
+void Layer::InitSpring()
+{
+	// 初始化结构弹簧 y方向
+	for (vtkIdType i = 0; i < grid_size; i++)
+	{
+		for (vtkIdType j = 0; j < grid_size - 1; j++)
+		{
+			Spring spring;
+			spring.imass1 = GetMassId(i, j);
+			spring.imass2 = GetMassId(i, j + 1);
+			spring.naturalLength = NaturalLengthDefault;
+			spring.springConstant = SpringConstantDefault;
+			spring.tension = 0;
+			springs[{ GetMassId(i, j), GetMassId(i, j + 1) }] = spring;
+			//springs.insert({ GetMassId(i, j) ,GetMassId(i, j + 1) }, spring);
+		}
+	}
+	// 初始化结构弹簧 x方向
+	for (int i = 0; i < grid_size - 1; i++)
+	{
+		for (int j = 0; j < grid_size; j++)
+		{
+			Spring spring;
+			spring.imass1 = GetMassId(i, j);
+			spring.imass2 = GetMassId(i + 1, j);
+			spring.naturalLength = NaturalLengthDefault;
+			spring.springConstant = SpringConstantDefault;
+			spring.tension = 0;
+			springs[{ GetMassId(i, j), GetMassId(i + 1, j) }] = spring;
+			//springs.insert({ GetMassId(i, j) ,GetMassId(i + 1, j) }, spring);
+		}
+	}
+
+	//剪切弹簧初始化-右下
+	//The next (gridSize-1)*(gridSize-1) go from a ball to the one below and right
+	//excluding those on the bottom or right
+	for (int i = 0; i < grid_size - 1; ++i)
+	{
+		for (int j = 0; j < grid_size - 1; ++j)
+		{
+			Spring spring;
+			spring.imass1 = GetMassId(i, j);
+			spring.imass2 = GetMassId(i + 1, j + 1);
+			spring.naturalLength = NaturalLengthDefault*sqrt(2.0);
+			spring.springConstant = SpringConstantDefault;
+			spring.tension = 0;
+			springs[{ GetMassId(i, j), GetMassId(i + 1, j + 1) }] = spring;
+		}
+	}
+
+	//剪切弹簧初始化-左下
+	//The next (gridSize-1)*(gridSize-1) go from a ball to the one below and left
+	//excluding those on the bottom or right
+	for (int i = 0; i < grid_size - 1; ++i)
+	{
+		for (int j = 1; j < grid_size; ++j)
+		{
+			Spring spring;
+			spring.imass1 = GetMassId(i, j);
+			spring.imass2 = GetMassId(i + 1, j - 1);
+			spring.naturalLength = NaturalLengthDefault*sqrt(2.0);
+			spring.springConstant = SpringConstantDefault;
+			spring.tension = 0;
+			springs[{ GetMassId(i, j), GetMassId(i + 1, j - 1) }] = spring;
+		}
+	}
+
+	//弯曲弹簧初始化
+	//The first (gridSize-2)*gridSize springs go from one ball to the next but one,
+	//excluding those on or next to the right hand edge
+	for (int i = 0; i < grid_size; ++i)
+	{
+		for (int j = 0; j < grid_size - 2; ++j)
+		{
+			Spring spring;
+			spring.imass1 = GetMassId(i, j);
+			spring.imass2 = GetMassId(i, j + 2);
+			spring.naturalLength = NaturalLengthDefault * 2;
+			spring.springConstant = SpringConstantDefault;
+			spring.tension = 0;
+			springs[{ GetMassId(i, j), GetMassId(i, j + 2) }] = spring;
+		}
+	}
+
+	//The next (gridSize-2)*gridSize springs go from one ball to the next but one below,
+	//excluding those on or next to the bottom edge
+	for (int i = 0; i < grid_size - 2; ++i)
+	{
+		for (int j = 0; j < grid_size; ++j)
+		{
+			Spring spring;
+			spring.imass1 = GetMassId(i, j);
+			spring.imass2 = GetMassId(i + 2, j);
+			spring.naturalLength = NaturalLengthDefault * 2;
+			spring.springConstant = SpringConstantDefault;
+			spring.tension = 0;
+			springs[{ GetMassId(i, j), GetMassId(i + 2, j) }] = spring;
+		}
+	}
+}
+
+void Layer::InitVtkData()
+{
+	int y = layer_height;
+	//////////////////////////////////////////////////////////////////////////
+	for (int i = 0; i < grid_size; i++)
+	{
+		for (int j = 0; j < grid_size; j++)
+		{
+			points->InsertNextPoint(i, y, j);
+		}
+	}
+
+	for (int i = 0; i < grid_size - 1; i++)
+	{
+		for (int j = 0; j < grid_size; j++)
+		{
+			// 沿x方向
+			vtkSmartPointer<vtkLine> line_x = vtkSmartPointer<vtkLine>::New();
+			line_x->GetPointIds()->SetId(0, i*grid_size + j);
+			line_x->GetPointIds()->SetId(1, (i + 1)*grid_size + j);
+			springs_structure->InsertNextCell(line_x);
+		}
+	}
+	for (int i = 0; i < grid_size; i++)
+	{
+		for (int j = 0; j < grid_size - 1; j++)
+		{
+			// 沿y方向
+			vtkSmartPointer<vtkLine> line_y = vtkSmartPointer<vtkLine>::New();
+			line_y->GetPointIds()->SetId(0, i*grid_size + j);
+			line_y->GetPointIds()->SetId(1, i*grid_size + j + 1);
+			springs_structure->InsertNextCell(line_y);
+		}
+	}
+	// 加入四边形拓扑结构vtkQuadraticQuad 
+	vtkSmartPointer<vtkCellArray> quad = vtkSmartPointer<vtkCellArray>::New();
+	for (int i = 0; i < grid_size - 1; i++)
+	{
+		for (int j = 0; j < grid_size - 1; j++)
+		{
+			quad->InsertNextCell(4);
+			quad->InsertCellPoint(GetMassId(i, j));
+			quad->InsertCellPoint(GetMassId(i, j + 1));
+			quad->InsertCellPoint(GetMassId(i + 1, j + 1));
+			quad->InsertCellPoint(GetMassId(i + 1, j));
+		}
+	}
+
+
+	polydata->SetPoints(points);
+	polydata->SetLines(springs_structure);
+	polydata->SetPolys(quad);
+
+	mapper->SetInputData(polydata);
+	actor->SetMapper(mapper);
 }
 
 void Layer::UpdateVtkData(vector<Mass> *pCurrent)
