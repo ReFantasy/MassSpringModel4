@@ -4,6 +4,7 @@
 #include "MyInteractorStyle.h"
 #include "TIMER.h"
 #include "Virtualstress.h"
+#include <windows.h>
 TIMER timer;
 //vtk可视化
 auto renderer = vtkSmartPointer<vtkRenderer>::New();
@@ -12,7 +13,7 @@ auto renderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
 
 // 更新帧
 void UpdateFrame();
-int grid_size = 25;
+int grid_size = 13;
 Layer layer(grid_size);
 Layer layer2(grid_size, 1);
 VirtualStress virtualStress(&layer, &layer2);
@@ -41,8 +42,8 @@ int main()
 		layer.GetMassRef(i).fixed = true;
 	}
 	
-	layer.SetTexture("./ImageResource/1.jpg");
-	layer2.SetTexture("./ImageResource/3.jpg");
+	//layer.SetTexture("./ImageResource/1.jpg");
+	//layer2.SetTexture("./ImageResource/3.jpg");
 	renderer->AddActor(layer.GetActor());
 	renderer->AddActor(layer2.GetActor());
 
@@ -57,8 +58,18 @@ int main()
 	renderWindowInteractor->SetInteractorStyle(style);
 	style->RegisterOnTimerFunc(UpdateFrame);
 
-	style->SetTimerDuration(30);
+	style->SetUseTimers(30);
 	style->UseTimersOn();
+
+	while (1)
+	{
+		Sleep(50);
+		UpdateFrame();
+		renderWindow->Render();
+	}
+
+
+	//style->SetTimerDuration(30);
 	//style->StartTimer();
 
 

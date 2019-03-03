@@ -1,7 +1,7 @@
 #include "Layer.h"
 #include "Virtualstress.h"
 // 重力
-VECTOR3D gravity(0.0f, -0.0f, 0.0f);
+VECTOR3D gravity(0.0f, -0.098f, 0.0f);
 
 // 弹簧属性
 float SpringConstantDefault = 15.f;
@@ -85,10 +85,10 @@ void Layer::UpdateFrame(float timePassedInSeconds)
 
 			// 阻尼力
 			//force += nextBalls[i].velocity*0.1;
-			if (i == grid_size*grid_size / 2)
+			/*if (i == grid_size*grid_size / 2)
 			{
 				force += VECTOR3D(0, -20.0, 0);
-			}
+			}*/
 			// 虚拟应力
 			if (pVirtualStress)
 			{
@@ -111,7 +111,7 @@ void Layer::UpdateFrame(float timePassedInSeconds)
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////
-	//*pCurrent = *pNext;
+
 	vector<Mass> *temp = pCurrent;
 	pCurrent = pNext;
 	pNext = temp;
