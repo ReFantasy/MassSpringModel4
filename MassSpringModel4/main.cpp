@@ -22,6 +22,7 @@ int main()
 {
 	layer.SetVirtualStress(&virtualStress);
 	layer2.SetVirtualStress(&virtualStress);
+
 	// 固定所有的边缘
 	for (int i = 0; i < grid_size; i++)
 	{
