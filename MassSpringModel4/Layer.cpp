@@ -1,17 +1,17 @@
 #include "Layer.h"
 #include "Virtualstress.h"
 // 重力
-VECTOR3D gravity(0.0f, -0.098f, 0.0f);
+VECTOR3D gravity(0.0f, -0.0f, 0.0f);
 
 // 弹簧属性
-float SpringConstantDefault = 20.f;
+float SpringConstantDefault = 15.f;
 float NaturalLengthDefault = 1.0f;
 
 // 质点质量
 float MassDefault = 0.01f;
 
 //Damping factor. Velocities are multiplied by this
-float dampFactor = 0.9f;
+float dampFactor = 0.1f;
 
 Layer::Layer(int grid_sz, double y)
 	:grid_size(grid_sz)
@@ -25,10 +25,13 @@ Layer::Layer(int grid_sz, double y)
 			mass.fixed = false;
 			mass.mass = 0.01;
 			mass.position.Set(i, y, j);
-			mass.velocity.Set(0, y, 0);
-			masses.push_back(mass);
+			mass.velocity.Set(0, 0, 0);
+			masses1.push_back(mass);
 		}
 	}
+	masses2 = masses1;
+	pCurrent = &masses1;
+	pNext = &masses2;
 
 	// 初始化结构弹簧 y方向
 	for (vtkIdType i = 0; i < grid_size; i++)
@@ -186,7 +189,8 @@ Layer::Layer(int grid_sz, double y)
 bool Layer::SetMassFixed(vtkIdType i, vtkIdType j, bool is_fixed)
 {
 	vtkIdType id = GetMassId(i, j);
-	masses[id].fixed = is_fixed;
+	masses1[id].fixed = is_fixed;
+	masses2[id].fixed = is_fixed;
 	return true;
 }
 
@@ -197,7 +201,7 @@ void Layer::UpdateFrame(float timePassedInSeconds)
 	{
 		//弹簧长度 = 弹簧两端点坐标距离
 		float springLength =
-			(masses[it->second.imass1].position - masses[it->second.imass2].position).GetLength();
+			((*pCurrent)[it->second.imass1].position - (*pCurrent)[it->second.imass2].position).GetLength();
 		//cout << "len:" << springLength << endl;
 
 		//伸展 = 当前长度 - 原始长度（符号包含了受力的方向）
@@ -211,14 +215,14 @@ void Layer::UpdateFrame(float timePassedInSeconds)
 	for (int i = 0; i < grid_size*grid_size; i++)
 	{
 		// 不改变的属性
-		masses[i].fixed = masses[i].fixed;
-		masses[i].mass = masses[i].mass;
+		(*pNext)[i].fixed = (*pCurrent)[i].fixed;
+		(*pNext)[i].mass = (*pCurrent)[i].mass;
 
 		// 如果球的位置固定，则位置不变，速度为零，否则更新信息
-		if (masses[i].fixed)
+		if ((*pCurrent)[i].fixed)
 		{
-			masses[i].position = masses[i].position;
-			masses[i].velocity.LoadZero();
+			(*pNext)[i].position = (*pCurrent)[i].position;
+			(*pNext)[i].velocity.LoadZero();
 		}
 		else
 		{
@@ -229,15 +233,15 @@ void Layer::UpdateFrame(float timePassedInSeconds)
 			{
 				if (it->second.imass1 == i)
 				{
-					VECTOR3D tensionDirection = masses[it->second.imass2].position - masses[it->second.imass1].position;
+					VECTOR3D tensionDirection = (*pCurrent)[it->second.imass2].position - (*pCurrent)[it->second.imass1].position;
 					tensionDirection.Normalize();
 
 					force += it->second.tension*tensionDirection;
 				}
-				//Similarly if the ball is "ball2"
+				//Similarly if the imass is "imass2"
 				if (it->second.imass2 == i)
 				{
-					VECTOR3D tensionDirection = masses[it->second.imass1].position - masses[it->second.imass2].position;
+					VECTOR3D tensionDirection = (*pCurrent)[it->second.imass1].position - (*pCurrent)[it->second.imass2].position;
 					tensionDirection.Normalize();
 
 					force += it->second.tension*tensionDirection;
@@ -248,43 +252,42 @@ void Layer::UpdateFrame(float timePassedInSeconds)
 			//force += nextBalls[i].velocity*0.1;
 			if (i == grid_size*grid_size / 2)
 			{
-				force += VECTOR3D(0,-20,0);
+				force += VECTOR3D(0, -20.0, 0);
 			}
 			// 虚拟应力
 			if (pVirtualStress)
 			{
 				vtkIdType tmpi = 0, tmpj = 0;
 				GetMassCoord(i, tmpi, tmpj);
-				//cout << pVirtualStress->GetForce(this, i, j) << endl;
 				force += pVirtualStress->GetForce(this, tmpi, tmpj);
 			}
 			// 加速度
-			VECTOR3D acceleration = force / masses[i].mass;
+			VECTOR3D acceleration = force / (*pCurrent)[i].mass;
 
 			// 更新速度
-			masses[i].velocity = masses[i].velocity + acceleration*(float)timePassedInSeconds;
+			(*pNext)[i].velocity = (*pCurrent)[i].velocity + acceleration*(float)timePassedInSeconds;
 
 			//Damp the velocity
-			masses[i].velocity *= dampFactor; //防止当加速度为0 但是速度不为零时出现无法停止的情况
+			(*pNext)[i].velocity *= dampFactor; //防止当加速度为0 但是速度不为零时出现无法停止的情况
 
 												 // 更新位置
-			masses[i].position = masses[i].position +
-				(masses[i].velocity + masses[i].velocity)*(float)timePassedInSeconds / 2;
+			(*pNext)[i].position = (*pCurrent)[i].position +
+				((*pNext)[i].velocity + (*pCurrent)[i].velocity)*(float)timePassedInSeconds / 2;
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////
 	//*pCurrent = *pNext;
-	/*vector<Mass> *temp = pCurrent;
+	vector<Mass> *temp = pCurrent;
 	pCurrent = pNext;
-	pNext = pCurrent;*/
+	pNext = temp;
 
-	UpdateVtkData();
+	UpdateVtkData(pCurrent);
 }
 
 void Layer::PrintInfo()
 {
 	cout << "Print Mass Info..." << endl;
-	for (int id = 0; id < masses.size(); id++)
+	for (int id = 0; id < masses1.size(); id++)
 	{
 		vtkIdType i, j;
 		GetMassCoord(id, i, j);
@@ -333,7 +336,7 @@ vtkSmartPointer<vtkTexture> Layer::SetTexture(std::string fileName)
 	return atext;
 }
 
-void Layer::UpdateVtkData()
+void Layer::UpdateVtkData(vector<Mass> *pCurrent)
 {
 	for (int i = 0; i < grid_size; ++i)
 	{
@@ -341,12 +344,12 @@ void Layer::UpdateVtkData()
 		{
 			points->SetPoint(
 				i*grid_size + j,
-				this->GetMassRef(i*grid_size + j).position.x,
-				this->GetMassRef(i*grid_size + j).position.y,
-				this->GetMassRef(i*grid_size + j).position.z
-				);
+				(*pCurrent)[i*grid_size + j].position.x,
+				(*pCurrent)[i*grid_size + j].position.y,
+				(*pCurrent)[i*grid_size + j].position.z);
 		}
 	}
+
 	points->Modified();
 }
 

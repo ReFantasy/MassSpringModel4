@@ -28,9 +28,12 @@ public:
 	void PrintInfo();
 	Mass & GetMassRef(int i, int j)
 	{
-		return masses[GetMassId(i, j)];
+		return (*pCurrent)[GetMassId(i, j)];
 	}
-	Mass & GetMassRef(vtkIdType id) { return masses[id]; }
+	Mass & GetMassRef(vtkIdType id) 
+	{ 
+		return (*pCurrent)[id];
+	}
 	vtkSmartPointer<vtkPolyData> GetPolydata() { return polydata; }
 
 	void SetVirtualStress(VirtualStress *_pVirtualStress) { pVirtualStress = _pVirtualStress; }
@@ -40,7 +43,10 @@ public:
 private:  // 数据
 
 	int grid_size;             // 正方形网格边长
-	vector<Mass> masses;       // 质点向量
+	vector<Mass> masses1;       // 质点向量
+	vector<Mass> masses2;       // 质点向量
+	vector<Mass> *pCurrent = nullptr;
+	vector<Mass> *pNext = nullptr;
 
 	// 弹簧map  索引为弹簧两端质点的ID
 	map<pair<vtkIdType, vtkIdType>, Spring> springs;    // 弹簧向量
@@ -83,6 +89,6 @@ private:  // 私有函数
 		j = id % grid_size;
 	}
 
-	void UpdateVtkData();
+	void UpdateVtkData(vector<Mass> *pCurrent);
 };
 #endif //__LAYER_H__

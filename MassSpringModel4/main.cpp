@@ -12,7 +12,7 @@ auto renderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
 
 // ¸üÐÂÖ¡
 void UpdateFrame();
-int grid_size = 17;
+int grid_size = 25;
 Layer layer(grid_size);
 Layer layer2(grid_size, 1);
 VirtualStress virtualStress(&layer, &layer2);
@@ -41,8 +41,8 @@ int main()
 		layer.GetMassRef(i).fixed = true;
 	}
 	
-	layer.SetTexture("1.jpg");
-	layer2.SetTexture("3.jpg");
+	layer.SetTexture("./ImageResource/1.jpg");
+	layer2.SetTexture("./ImageResource/3.jpg");
 	renderer->AddActor(layer.GetActor());
 	renderer->AddActor(layer2.GetActor());
 
