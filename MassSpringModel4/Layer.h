@@ -49,7 +49,7 @@ private:  // 数据
 	float MassDefault = 0.01f;
 
 	//Damping factor. Velocities are multiplied by this
-	float dampFactor = 0.1f;
+	float dampFactor = 0.5f;
 
 
 	// 弹簧map  索引为弹簧两端质点的ID
