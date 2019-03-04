@@ -13,7 +13,7 @@ auto renderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
 
 // 更新帧
 void UpdateFrame();
-int grid_size = 13;
+int grid_size = 30;
 Layer layer(grid_size);
 Layer layer2(grid_size, 1);
 VirtualStress virtualStress(&layer, &layer2);
@@ -44,7 +44,8 @@ int main()
 	
 	//layer.SetTexture("./ImageResource/1.jpg");
 	//layer2.SetTexture("./ImageResource/3.jpg");
-	renderer->AddActor(layer.GetActor());
+	
+	//renderer->AddActor(layer.GetActor());
 	renderer->AddActor(layer2.GetActor());
 
 	// 在渲染窗口设置并显示坐标系
@@ -71,12 +72,12 @@ int main()
 	style->SetUseTimers(30);
 	style->UseTimersOn();
 
-	//while (1)
-	//{
-	//	Sleep(50);
-	//	UpdateFrame();
-	//	renderWindow->Render();
-	//}
+	while (1)
+	{
+		Sleep(50);
+		UpdateFrame();
+		renderWindow->Render();
+	}
 
 
 	//style->SetTimerDuration(30);

@@ -27,9 +27,16 @@ public:
 	}
 	vtkSmartPointer<vtkPolyData> GetPolydata() { return polydata; }
 
+	// 计算形变大小
+	// 形变的定义为：每一个质点对应初始位置的偏移距离之和
+	double ComputeDeformationSize();
+
+	// 加入虚拟应力对象
 	void SetVirtualStress(VirtualStress *_pVirtualStress) { pVirtualStress = _pVirtualStress; }
 
+	// 设置贴图文件
 	vtkSmartPointer<vtkTexture> SetTexture(std::string fileName);
+
 	vtkSmartPointer<vtkActor> GetActor() const { return actor; }
 private:  // 数据
 

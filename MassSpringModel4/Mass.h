@@ -17,6 +17,8 @@ public:
 	// 质点的法向量
 	VECTOR3D normal;
 
+	// 初始位置
+	VECTOR3D init_position;
 };
 
 

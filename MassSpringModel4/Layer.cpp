@@ -106,6 +106,8 @@ void Layer::UpdateFrame(float timePassedInSeconds)
 	}
 	//////////////////////////////////////////////////////////////////////////
 
+	// 输出形变大小
+	cout << ComputeDeformationSize() << endl;
 	vector<Mass> *temp = pCurrent;
 	pCurrent = pNext;
 	pNext = temp;
@@ -135,6 +137,35 @@ void Layer::PrintInfo()
 		printf("(%lld,%lld)->(%lld,%lld)\n", i_1, j_1, i_2, j_2);
 	}
 	
+}
+
+inline double Layer::ComputeDeformationSize()
+{
+	//double deformationSize = 0;
+	//assert(grid_size > 4);
+	//static double dx = 1.0 / (grid_size - 4);
+
+	//for (int i = 2; i < grid_size - 2; i++)
+	//{
+	//	for (int j = 2; j < grid_size - 2; j++)
+	//	{
+	//		deformationSize += (((*pCurrent)[GetMassId(i, j)].position - (*pCurrent)[i].init_position).GetLength()*pow(dx, 2));
+	//	}
+	//}
+	//return deformationSize / grid_size;
+
+	double deformationSize = 0;
+	assert(grid_size > 4);
+	static double dx = 1.0 / grid_size;
+
+	for (int i = 2; i < grid_size - 2; i++)
+	{
+		for (int j = 2; j < grid_size - 2; j++)
+		{
+			deformationSize += (((*pCurrent)[GetMassId(i, j)].position - (*pCurrent)[i].init_position).GetLength()*pow(dx, 2));
+		}
+	}
+	return deformationSize;
 }
 
 vtkSmartPointer<vtkTexture> Layer::SetTexture(std::string fileName)
@@ -177,6 +208,7 @@ void Layer::InitMass()
 			mass.fixed = false;
 			mass.mass = 0.01;
 			mass.position.Set(i, j, y);
+			mass.init_position.Set(i, j, y);
 			mass.velocity.Set(0, 0, 0);
 			masses1.push_back(mass);
 		}
