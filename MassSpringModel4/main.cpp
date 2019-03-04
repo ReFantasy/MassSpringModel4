@@ -13,7 +13,7 @@ auto renderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
 
 // ¸üÐÂÖ¡
 void UpdateFrame();
-int grid_size = 30;
+int grid_size = 91;
 Layer layer(grid_size);
 Layer layer2(grid_size, 1);
 VirtualStress virtualStress(&layer, &layer2);
