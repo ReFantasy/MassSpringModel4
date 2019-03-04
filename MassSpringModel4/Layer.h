@@ -27,8 +27,7 @@ public:
 	}
 	vtkSmartPointer<vtkPolyData> GetPolydata() { return polydata; }
 
-	// 计算形变大小
-	// 形变的定义为：每一个质点对应初始位置的偏移距离之和
+	// 计算形变的最高位置
 	double ComputeDeformationSize();
 
 	// 加入虚拟应力对象

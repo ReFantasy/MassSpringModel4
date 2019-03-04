@@ -77,7 +77,7 @@ void Layer::UpdateFrame(float timePassedInSeconds)
 			//force += nextBalls[i].velocity*0.1;
 			if (i == grid_size*grid_size / 2)
 			{
-				force += VECTOR3D(0, 0, -20.5);
+				force += VECTOR3D(0, 0, -30.5);
 			}
 			// 虚拟应力
 			if (pVirtualStress)
@@ -141,29 +141,11 @@ void Layer::PrintInfo()
 
 inline double Layer::ComputeDeformationSize()
 {
-	//double deformationSize = 0;
-	//assert(grid_size > 4);
-	//static double dx = 1.0 / (grid_size - 4);
-
-	//for (int i = 2; i < grid_size - 2; i++)
-	//{
-	//	for (int j = 2; j < grid_size - 2; j++)
-	//	{
-	//		deformationSize += (((*pCurrent)[GetMassId(i, j)].position - (*pCurrent)[i].init_position).GetLength()*pow(dx, 2));
-	//	}
-	//}
-	//return deformationSize / grid_size;
-
-	double deformationSize = 0;
-	assert(grid_size > 4);
-	static double dx = 1.0 / grid_size;
-
-	for (int i = 2; i < grid_size - 2; i++)
+	// 计算形变的最高位置
+	static double deformationSize = 0;
+	for (const auto &e : (*pCurrent))
 	{
-		for (int j = 2; j < grid_size - 2; j++)
-		{
-			deformationSize += (((*pCurrent)[GetMassId(i, j)].position - (*pCurrent)[i].init_position).GetLength()*pow(dx, 2));
-		}
+		deformationSize = (e.position.z < deformationSize ? e.position.z : deformationSize);
 	}
 	return deformationSize;
 }
