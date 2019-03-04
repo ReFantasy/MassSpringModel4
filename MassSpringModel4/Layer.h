@@ -45,7 +45,7 @@ private:  // 数据
 	vector<Mass> *pCurrent = nullptr;
 	vector<Mass> *pNext = nullptr;
 
-	int layer_height = 0;  // 质点弹簧层的高度
+	double layer_height;  // 质点弹簧层的高度
 
 						   // 弹簧属性
 	float SpringConstantDefault = 25.f;

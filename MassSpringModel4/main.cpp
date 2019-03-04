@@ -13,7 +13,7 @@ auto renderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
 
 // ¸üÐÂÖ¡
 void UpdateFrame();
-int grid_size = 15;
+int grid_size = 27;
 Layer layer(grid_size);
 Layer layer2(grid_size, 1);
 VirtualStress virtualStress(&layer, &layer2);
@@ -72,12 +72,12 @@ int main()
 	style->SetUseTimers(30);
 	style->UseTimersOn();
 
-	while (1)
-	{
-		Sleep(50);
-		UpdateFrame();
-		renderWindow->Render();
-	}
+	//while (1)
+	//{
+	//	Sleep(50);
+	//	UpdateFrame();
+	//	renderWindow->Render();
+	//}
 
 
 	//style->SetTimerDuration(30);
@@ -107,6 +107,7 @@ void UpdateFrame()
 		float timePassedInSeconds = 0.01f;
 		layer.UpdateFrame(timePassedInSeconds);
 		layer2.UpdateFrame(timePassedInSeconds);
+		//layer2.PrintInfo();
 	}
 	
 	//renderWindow->Render();

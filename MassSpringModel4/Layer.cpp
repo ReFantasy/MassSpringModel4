@@ -4,8 +4,9 @@
 VECTOR3D gravity(0.0f, 0.0f,-9.8f);
 
 Layer::Layer(int grid_sz, double y)
-	:grid_size(grid_sz), layer_height(y)
+	:grid_size(grid_sz)
 {
+	layer_height = y;
 	InitMass();
 	InitSpring();
 	InitVtkData();
@@ -75,9 +76,10 @@ void Layer::UpdateFrame(float timePassedInSeconds)
 
 			// 阻尼力
 			//force += nextBalls[i].velocity*0.1;
-			if (i == grid_size*grid_size / 2)
+			int xx = grid_size / 2, yy = grid_size / 2;
+			if (i == GetMassId(xx,yy) || i==GetMassId(xx+1,yy)||i==GetMassId(xx,yy+1)||i==GetMassId(xx+1,yy+1))
 			{
-				force += VECTOR3D(0, 0, -30.5);
+				force += VECTOR3D(0, 0, -10.0);
 			}
 			// 虚拟应力
 			if (pVirtualStress)
@@ -105,9 +107,6 @@ void Layer::UpdateFrame(float timePassedInSeconds)
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////
-
-	// 输出形变大小
-	cout << ComputeDeformationSize() << endl;
 	vector<Mass> *temp = pCurrent;
 	pCurrent = pNext;
 	pNext = temp;
@@ -117,35 +116,43 @@ void Layer::UpdateFrame(float timePassedInSeconds)
 
 void Layer::PrintInfo()
 {
-	cout << "Print Mass Info..." << endl;
-	for (int id = 0; id < masses1.size(); id++)
-	{
-		vtkIdType i, j;
-		GetMassCoord(id, i, j);
-		cout << "Id:" << id << " i:" << i << " j:" << j << endl;
-	}
+	//cout << "Print Mass Info..." << endl;
+	//for (int id = 0; id < masses1.size(); id++)
+	//{
+	//	vtkIdType i, j;
+	//	GetMassCoord(id, i, j);
+	//	cout << "Id:" << id << " i:" << i << " j:" << j << endl;
+	//}
 
-	cout << "Print Spring Info..." << endl;
-	for (auto &e : springs)
-	{
-		vtkIdType p1, p2;
-		p1 = e.first.first;
-		p2 = e.first.second;
-		vtkIdType i_1, j_1, i_2, j_2;
-		GetMassCoord(p1, i_1, j_1);
-		GetMassCoord(p2, i_2, j_2);
-		printf("(%lld,%lld)->(%lld,%lld)\n", i_1, j_1, i_2, j_2);
-	}
+	//cout << "Print Spring Info..." << endl;
+	//for (auto &e : springs)
+	//{
+	//	vtkIdType p1, p2;
+	//	p1 = e.first.first;
+	//	p2 = e.first.second;
+	//	vtkIdType i_1, j_1, i_2, j_2;
+	//	GetMassCoord(p1, i_1, j_1);
+	//	GetMassCoord(p2, i_2, j_2);
+	//	printf("(%lld,%lld)->(%lld,%lld)\n", i_1, j_1, i_2, j_2);
+	//}
 	
+
+	// 输出形变大小
+	cout << 1-ComputeDeformationSize() << endl;
 }
 
 inline double Layer::ComputeDeformationSize()
 {
 	// 计算形变的最高位置
-	static double deformationSize = 0;
+	static double deformationSize = 10;
 	for (const auto &e : (*pCurrent))
 	{
-		deformationSize = (e.position.z < deformationSize ? e.position.z : deformationSize);
+		//cout << "point z" << e.position.z << endl;
+		//cout << "deformationSize" << deformationSize << endl;
+	
+		if(e.position.z<deformationSize)
+			deformationSize = e.position.z;
+		//cout << "deformationSize" << deformationSize << endl;
 	}
 	return deformationSize;
 }
