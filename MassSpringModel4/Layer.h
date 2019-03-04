@@ -9,15 +9,6 @@ using namespace std;
 // 重力
 extern VECTOR3D gravity;
 
-// 弹簧属性
-extern float SpringConstantDefault;
-extern float NaturalLengthDefault;
-
-// 质点质量
-extern float MassDefault;
-
-//Damping factor. Velocities are multiplied by this
-extern float dampFactor;
 class VirtualStress;
 class Layer
 {
@@ -49,6 +40,17 @@ private:  // 数据
 	vector<Mass> *pNext = nullptr;
 
 	int layer_height = 0;  // 质点弹簧层的高度
+
+						   // 弹簧属性
+	float SpringConstantDefault = 15.f;
+	float NaturalLengthDefault = 1.0f;
+
+	// 质点质量
+	float MassDefault = 0.01f;
+
+	//Damping factor. Velocities are multiplied by this
+	float dampFactor = 0.1f;
+
 
 	// 弹簧map  索引为弹簧两端质点的ID
 	map<pair<vtkIdType, vtkIdType>, Spring> springs;    // 弹簧向量

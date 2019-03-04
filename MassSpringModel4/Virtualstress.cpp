@@ -1,5 +1,13 @@
 #include "Virtualstress.h"
 #include "Layer.h"
+
+// 虚拟应力层默认为弹簧层
+// 弹簧属性
+float SpringConstantDefault = 5.0f;
+float NaturalLengthDefault = 1.0f;
+// 质点质量
+float MassDefault = 0.01f;
+
 VirtualStress::VirtualStress(Layer *layer1, Layer *layer2)
 	:pLayer1(layer1),pLayer2(layer2)
 {

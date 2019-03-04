@@ -1,17 +1,7 @@
 #include "Layer.h"
 #include "Virtualstress.h"
 // 重力
-VECTOR3D gravity(0.0f, -0.098f, 0.0f);
-
-// 弹簧属性
-float SpringConstantDefault = 15.f;
-float NaturalLengthDefault = 1.0f;
-
-// 质点质量
-float MassDefault = 0.01f;
-
-//Damping factor. Velocities are multiplied by this
-float dampFactor = 0.1f;
+VECTOR3D gravity(0.0f, -9.8f, 0.0f);
 
 Layer::Layer(int grid_sz, double y)
 	:grid_size(grid_sz), layer_height(y)
@@ -62,7 +52,7 @@ void Layer::UpdateFrame(float timePassedInSeconds)
 		else
 		{
 			// 计算质点受力
-			VECTOR3D force = gravity;
+			VECTOR3D force = gravity*MassDefault;
 			// 查找该质点所连接的弹簧，累加其所受到的弹簧力
 			for (auto it = springs.begin(); it != springs.end(); it++)
 			{
@@ -85,10 +75,10 @@ void Layer::UpdateFrame(float timePassedInSeconds)
 
 			// 阻尼力
 			//force += nextBalls[i].velocity*0.1;
-			/*if (i == grid_size*grid_size / 2)
+			if (i == grid_size*grid_size / 2)
 			{
-				force += VECTOR3D(0, -20.0, 0);
-			}*/
+				force += VECTOR3D(0, -0.5, 0);
+			}
 			// 虚拟应力
 			if (pVirtualStress)
 			{
