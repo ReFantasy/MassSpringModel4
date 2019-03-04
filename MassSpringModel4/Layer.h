@@ -42,7 +42,7 @@ private:  // 数据
 	int layer_height = 0;  // 质点弹簧层的高度
 
 						   // 弹簧属性
-	float SpringConstantDefault = 15.f;
+	float SpringConstantDefault = 25.f;
 	float NaturalLengthDefault = 1.0f;
 
 	// 质点质量
@@ -63,7 +63,8 @@ private:  // 数据
 	VirtualStress *pVirtualStress = nullptr;
 
 	// 纹理数据
-
+	// 点数据的标量值
+	vtkSmartPointer<vtkDoubleArray> weights = vtkSmartPointer<vtkDoubleArray >::New();
 	// 计算多边形的法向量
 	vtkSmartPointer<vtkPolyDataNormals > normal = vtkSmartPointer<vtkPolyDataNormals >::New();
 	// 设置多边形的纹理映射模式

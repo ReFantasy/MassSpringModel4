@@ -81,3 +81,7 @@
 #include <vtkTransformTextureCoords.h>
 #include <vtkQuadraticQuad.h>
 #include <vtkQuadraticPolygon.h>
+#include <vtkAxesActor.h>
+#include "vtkCaptionActor2D.h"
+#include "vtkProperty2D.h"
+#include <vtkDoubleArray.h>

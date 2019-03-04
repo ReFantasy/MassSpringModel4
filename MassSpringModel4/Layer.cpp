@@ -1,7 +1,7 @@
 #include "Layer.h"
 #include "Virtualstress.h"
 // 重力
-VECTOR3D gravity(0.0f, -9.8f, 0.0f);
+VECTOR3D gravity(0.0f, 0.0f,-9.8f);
 
 Layer::Layer(int grid_sz, double y)
 	:grid_size(grid_sz), layer_height(y)
@@ -75,10 +75,10 @@ void Layer::UpdateFrame(float timePassedInSeconds)
 
 			// 阻尼力
 			//force += nextBalls[i].velocity*0.1;
-			/*if (i == grid_size*grid_size / 2)
+			if (i == grid_size*grid_size / 2)
 			{
-				force += VECTOR3D(0, -0.5, 0);
-			}*/
+				force += VECTOR3D(0, 0, -20.5);
+			}
 			// 虚拟应力
 			if (pVirtualStress)
 			{
@@ -98,6 +98,10 @@ void Layer::UpdateFrame(float timePassedInSeconds)
 												 // 更新位置
 			(*pNext)[i].position = (*pCurrent)[i].position +
 				((*pNext)[i].velocity + (*pCurrent)[i].velocity)*(float)timePassedInSeconds / 2;
+
+			// 更新数据颜色映射
+			weights->SetValue(i, abs((*pNext)[i].position.z));
+			polydata->GetPointData()->SetScalars(weights);
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////
@@ -172,7 +176,7 @@ void Layer::InitMass()
 			Mass mass;
 			mass.fixed = false;
 			mass.mass = 0.01;
-			mass.position.Set(i, y, j);
+			mass.position.Set(i, j, y);
 			mass.velocity.Set(0, 0, 0);
 			masses1.push_back(mass);
 		}
@@ -291,7 +295,7 @@ void Layer::InitVtkData()
 	{
 		for (int j = 0; j < grid_size; j++)
 		{
-			points->InsertNextPoint(i, y, j);
+			points->InsertNextPoint(i, j, y);
 		}
 	}
 
@@ -331,6 +335,17 @@ void Layer::InitVtkData()
 		}
 	}
 
+	// 颜色映射
+	weights->SetNumberOfValues(grid_size*grid_size);
+	// 初始化质点
+	for (vtkIdType i = 0; i < grid_size; i++)
+	{
+		for (vtkIdType j = 0; j < grid_size; j++)
+		{
+			weights->SetValue(GetMassId(i, j), 0.8);
+		}
+	}
+	polydata->GetPointData()->SetScalars(weights);
 
 	polydata->SetPoints(points);
 	polydata->SetLines(springs_structure);

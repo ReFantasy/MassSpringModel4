@@ -13,7 +13,7 @@ auto renderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
 
 // 更新帧
 void UpdateFrame();
-int grid_size = 25;
+int grid_size = 13;
 Layer layer(grid_size);
 Layer layer2(grid_size, 1);
 VirtualStress virtualStress(&layer, &layer2);
@@ -44,8 +44,18 @@ int main()
 	
 	//layer.SetTexture("./ImageResource/1.jpg");
 	//layer2.SetTexture("./ImageResource/3.jpg");
-	//renderer->AddActor(layer.GetActor());
+	renderer->AddActor(layer.GetActor());
 	renderer->AddActor(layer2.GetActor());
+
+	// 在渲染窗口设置并显示坐标系
+	vtkSmartPointer<vtkAxesActor> axes1 = vtkSmartPointer<vtkAxesActor>::New();
+	axes1->SetShaftTypeToLine();
+	axes1->SetConeRadius(0.1);
+	axes1->SetConeResolution(100);
+	axes1->SetTotalLength(7, 7, 3);
+	
+	renderer->AddActor(axes1);
+
 
 	renderWindow->AddRenderer(renderer);
 
