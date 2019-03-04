@@ -39,8 +39,8 @@ FORCE VirtualStress::GetForce(Layer *layer, int i, int j)
 		force = tension*tensionDirection;
 	}
 	
-	//return VECTOR3D(0, 0, 0);
-	return force;
+	return VECTOR3D(0, 0, 0);
+	//return force;
 }
 
 

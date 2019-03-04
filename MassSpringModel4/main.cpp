@@ -13,7 +13,7 @@ auto renderWindowInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
 
 // 更新帧
 void UpdateFrame();
-int grid_size = 13;
+int grid_size = 25;
 Layer layer(grid_size);
 Layer layer2(grid_size, 1);
 VirtualStress virtualStress(&layer, &layer2);
@@ -44,13 +44,13 @@ int main()
 	
 	//layer.SetTexture("./ImageResource/1.jpg");
 	//layer2.SetTexture("./ImageResource/3.jpg");
-	renderer->AddActor(layer.GetActor());
+	//renderer->AddActor(layer.GetActor());
 	renderer->AddActor(layer2.GetActor());
 
 	renderWindow->AddRenderer(renderer);
 
 	renderWindowInteractor->SetRenderWindow(renderWindow);
-
+	renderWindow->SetSize(800,600);
 	renderWindow->Render();
 
 	// 计时器

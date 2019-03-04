@@ -75,10 +75,10 @@ void Layer::UpdateFrame(float timePassedInSeconds)
 
 			// ×èÄáÁ¦
 			//force += nextBalls[i].velocity*0.1;
-			if (i == grid_size*grid_size / 2)
+			/*if (i == grid_size*grid_size / 2)
 			{
 				force += VECTOR3D(0, -0.5, 0);
-			}
+			}*/
 			// ÐéÄâÓ¦Á¦
 			if (pVirtualStress)
 			{
