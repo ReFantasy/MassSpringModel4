@@ -3,8 +3,8 @@
 // 重力
 VECTOR3D gravity(0.0f, 0.0f,-9.8f);
 
-Layer::Layer(int grid_sz, double y)
-	:grid_size(grid_sz)
+Layer::Layer(int grid_sz, double y, vtkIdType _layer_id)
+	:grid_size(grid_sz),layer_id(_layer_id)
 {
 	layer_height = y;
 	InitMass();
@@ -76,17 +76,32 @@ void Layer::UpdateFrame(float timePassedInSeconds)
 
 			// 阻尼力
 			//force += nextBalls[i].velocity*0.1;
+
+			// 施加外力
 			int xx = grid_size / 2, yy = grid_size / 2;
-			if (i == GetMassId(xx,yy) || i==GetMassId(xx+1,yy)||i==GetMassId(xx,yy+1)||i==GetMassId(xx+1,yy+1))
+			/*if (i == GetMassId(xx,yy) || i==GetMassId(xx+1,yy)||i==GetMassId(xx,yy+1)||i==GetMassId(xx+1,yy+1))
 			{
 				force += VECTOR3D(0, 0, -10.0);
+			}*/
+			if ((i == grid_size*grid_size/2 ) && (layer_id == 2))
+			{
+				force += VECTOR3D(0, 0, -30.0);
 			}
+
+
+
 			// 虚拟应力
 			if (pVirtualStress)
 			{
 				vtkIdType tmpi = 0, tmpj = 0;
 				GetMassCoord(i, tmpi, tmpj);
 				force += pVirtualStress->GetForce(this, tmpi, tmpj);
+			}
+			if (pVirtualStress2)
+			{
+				vtkIdType tmpi = 0, tmpj = 0;
+				GetMassCoord(i, tmpi, tmpj);
+				force += pVirtualStress2->GetForce(this, tmpi, tmpj);
 			}
 			// 加速度
 			VECTOR3D acceleration = force / (*pCurrent)[i].mass;

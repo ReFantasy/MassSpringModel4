@@ -13,7 +13,7 @@ class VirtualStress;
 class Layer
 {
 public:
-	Layer(int grid_sz, double y = 0);
+	Layer(int grid_sz, double y = 0, vtkIdType layer_id = 0);
 	bool SetMassFixed(vtkIdType i, vtkIdType j, bool is_fixed);
 	void UpdateFrame(float timePassedInSeconds);
 	void PrintInfo();
@@ -31,14 +31,18 @@ public:
 	double ComputeDeformationSize();
 
 	// 加入虚拟应力对象
-	void SetVirtualStress(VirtualStress *_pVirtualStress) { pVirtualStress = _pVirtualStress; }
+	void SetVirtualStress(VirtualStress *_pVirtualStress, VirtualStress *_pVirtualStress2 = nullptr)
+	{ 
+		pVirtualStress = _pVirtualStress; 
+		pVirtualStress2 = _pVirtualStress2;
+	}
 
 	// 设置贴图文件
 	vtkSmartPointer<vtkTexture> SetTexture(std::string fileName);
 
 	vtkSmartPointer<vtkActor> GetActor() const { return actor; }
 private:  // 数据
-
+	vtkIdType layer_id;
 	int grid_size;             // 正方形网格边长
 	vector<Mass> masses1;       // 质点向量
 	vector<Mass> masses2;       // 质点向量
@@ -67,6 +71,7 @@ private:  // 数据
 	vtkSmartPointer<vtkPolyData> polydata = vtkSmartPointer<vtkPolyData>::New();
 
 	VirtualStress *pVirtualStress = nullptr;
+	VirtualStress *pVirtualStress2 = nullptr;
 
 	// 纹理数据
 	// 点数据的标量值
