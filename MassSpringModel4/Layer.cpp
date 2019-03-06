@@ -85,7 +85,7 @@ void Layer::UpdateFrame(float timePassedInSeconds)
 			}*/
 			if ((i == grid_size*grid_size/2 ) && (layer_id == 2))
 			{
-				force += VECTOR3D(0, 0, -30.0);
+				force += VECTOR3D(0, 0, -20.0);
 			}
 
 

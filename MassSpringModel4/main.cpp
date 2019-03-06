@@ -17,8 +17,10 @@ int grid_size = 17;
 Layer layer0(grid_size,0,0);
 Layer layer1(grid_size, 1,1);
 Layer layer2(grid_size, 2,2);
+Layer layer3(grid_size, 3, 3);
 VirtualStress virtualStress01(&layer0, &layer1);
 VirtualStress virtualStress12(&layer1, &layer2);
+VirtualStress virtualStress23(&layer1, &layer2);
 
 
 int main()
@@ -26,6 +28,7 @@ int main()
 	layer0.SetVirtualStress(&virtualStress01);
 	layer1.SetVirtualStress(&virtualStress01,&virtualStress12);
 	layer2.SetVirtualStress(&virtualStress12);
+	//layer3.SetVirtualStress(&virtualStress23);
 	// 固定所有的边缘
 	for (int i = 0; i < grid_size; i++)
 	{
@@ -43,6 +46,11 @@ int main()
 		layer2.GetMassRef(i*grid_size).fixed = true;
 		layer2.GetMassRef((i + 1)*grid_size - 1).fixed = true;
 		layer2.GetMassRef(grid_size*grid_size - 1 - i).fixed = true;
+
+		layer3.GetMassRef(i).fixed = true;
+		layer3.GetMassRef(i*grid_size).fixed = true;
+		layer3.GetMassRef((i + 1)*grid_size - 1).fixed = true;
+		layer3.GetMassRef(grid_size*grid_size - 1 - i).fixed = true;
 	}
 	// 固定所有的点
 	for (int i = 0; i < grid_size*grid_size; i++)
@@ -56,6 +64,7 @@ int main()
 	renderer->AddActor(layer0.GetActor());
 	renderer->AddActor(layer1.GetActor());
 	renderer->AddActor(layer2.GetActor());
+	renderer->AddActor(layer3.GetActor());
 
 	// 在渲染窗口设置并显示坐标系
 	vtkSmartPointer<vtkAxesActor> axes1 = vtkSmartPointer<vtkAxesActor>::New();
@@ -117,6 +126,7 @@ void UpdateFrame()
 		layer0.UpdateFrame(timePassedInSeconds);
 		layer1.UpdateFrame(timePassedInSeconds);
 		layer2.UpdateFrame(timePassedInSeconds);
+		layer3.UpdateFrame(timePassedInSeconds);
 		layer2.PrintInfo();
 	}
 	
